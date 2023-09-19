@@ -1,0 +1,718 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="SmsApiDAO">
+	<select id="getSmsListTarget" resultType="smsApiVO" >
+		SELECT 		A.MSGID
+					,A.KEYGEN
+					,A.PLAN_USER_ID
+					,A.USER_ID
+					,A.DEPT_NO
+					,A.SEG_NO
+					,A.SEND_TELNO
+					,A.CAMPUS_NO
+					,A.O_CODE
+					,A.P_CODE
+					,A.SEND_YM
+					,A.SEND_DATE
+					,A.SMS_NAME
+					,A.SMS_MESSAGE
+					,A.STATUS
+					,A.GUBUN
+					,A.NUM_VAL
+					,A.LEGAL_YN
+					,A.LEGAL_CF
+					,A.TASK_NM
+					,A.BACH_GUBUN
+					,A.BACH_DATE
+					,A.MSG_GUBUN
+					,A.SMS_STATUS
+					,A.SEND_NM
+					,A.SEND_TYP
+					,A.TEMP_CD
+					,A.REG_ID
+					,A.REG_DT
+					,A.UP_ID
+					,A.UP_DT
+					,A.SEND_END_DT
+					,A.SEND_START_DT
+					,A.SEND_TOT_CNT
+					,A.VALID_YN
+					,A.EXE_USER_ID
+					,A.REQUEST_KEY
+					,B.TEMP_MAPP_CONTENT 
+					,B.WEBLINK_YN 
+		FROM		NEO_SMS A
+		LEFT OUTER JOIN  NEO_KAKAOTALK_TEMPLATE B
+		ON A.TEMP_CD = B.TEMP_CD 
+		WHERE		A.STATUS = '001' AND 
+					A.REQUEST_KEY IS NOT NULL AND
+					A.SEND_DATE &lt;= (DATE_FORMAT(NOW(), "%Y%m%d%H%i%s")) AND
+					A.SMS_STATUS ='000'
+					AND A.GUBUN IN ('000','001','002')
+		ORDER BY 	A.REG_DT ASC
+		LIMIT 1;
+	</select>
+	
+	<select id="getKkoSmsListTarget" resultType="smsApiVO" >
+		SELECT 		A.MSGID
+					,A.KEYGEN
+					,A.PLAN_USER_ID
+					,A.USER_ID
+					,A.DEPT_NO
+					,A.SEG_NO
+					,A.SEND_TELNO
+					,A.CAMPUS_NO
+					,A.O_CODE
+					,A.P_CODE
+					,A.SEND_YM
+					,A.SEND_DATE
+					,A.SMS_NAME
+					,A.SMS_MESSAGE
+					,A.STATUS
+					,A.GUBUN
+					,A.NUM_VAL
+					,A.LEGAL_YN
+					,A.LEGAL_CF
+					,A.TASK_NM
+					,A.BACH_GUBUN
+					,A.BACH_DATE
+					,A.MSG_GUBUN
+					,A.SMS_STATUS
+					,A.SEND_NM
+					,A.SEND_TYP
+					,A.TEMP_CD
+					,A.REG_ID
+					,A.REG_DT
+					,A.UP_ID
+					,A.UP_DT
+					,A.SEND_END_DT
+					,A.SEND_START_DT
+					,A.SEND_TOT_CNT
+					,A.VALID_YN
+					,A.EXE_USER_ID
+					,A.REQUEST_KEY
+					,B.TEMP_MAPP_CONTENT 
+					,B.WEBLINK_YN 
+		FROM		NEO_SMS A
+		LEFT OUTER JOIN  NEO_KAKAOTALK_TEMPLATE B
+		ON A.TEMP_CD = B.TEMP_CD 
+		WHERE		A.STATUS = '001' AND 
+					A.REQUEST_KEY IS NOT NULL AND
+					A.SEND_DATE &lt;= (DATE_FORMAT(NOW(), "%Y%m%d%H%i%s")) AND
+					A.SMS_STATUS ='000'
+					AND A.GUBUN ='004'
+		ORDER BY 	A.REG_DT ASC
+		LIMIT 1;
+	</select>
+	
+	<update id="updateSmsStatus">
+		 UPDATE NEO_SMS 
+		    SET STATUS=#{status}, 
+		        UP_ID=#{userId},
+		        UP_DT=#{upDt},
+		        SEND_END_DT=#{sendEndDt}  
+		  WHERE REQUEST_KEY =#{requestKey}
+	</update>
+	
+	<select id="getSmsPhoneList" resultType="smsPhoneVO">
+		SELECT PHONE
+		  FROM NEO_SMS_API
+		 WHERE MSGID  = #{msgid}
+		   AND KEYGEN = #{keygen}
+		 ORDER BY PHONE
+	</select>
+	
+	<insert id="insertSmsQueue" parameterType="smsQueueVO">
+		INSERT IGNORE INTO BIZ_MSG
+		(
+			CMID
+		  , UMID
+		  , MSG_TYPE
+		  , STATUS
+		  , REQUEST_TIME
+		  , SEND_TIME
+		  , DEST_PHONE
+		  , SEND_PHONE
+		  , DEST_NAME
+		  , SEND_NAME
+		  , SUBJECT
+		  , MSG_BODY
+		  , NATION_CODE
+		  , SENDER_KEY
+		  , TEMPLATE_CODE
+		  , TIMEOUT
+		  , RE_TYPE
+		  , RE_BODY
+		  , RE_PART
+		  , AD_FLAG
+		  , ATTACHED_FILE
+		  , MSGID
+		  , KEYGEN
+		)
+		VALUES
+		<foreach collection="list" index="index" item="item" separator=",">
+		(
+			MD5(UUID())
+		  , #{item.umid}
+		  , #{item.msgType}
+		  , #{item.status}
+		  , NOW()
+		  , NOW()
+		  , #{item.destPhone}
+		  , #{item.sendPhone}
+		  , #{item.destName}
+		  , #{item.sendName}
+		  , #{item.subject}
+		  , #{item.msgBody}
+		  , #{item.nationCode}
+		  , #{item.senderKey}
+		  , #{item.templateCode}
+		  , #{item.timeout}
+		  , #{item.reType}
+		  , #{item.reBody}
+		  , #{item.rePart}
+		  , #{item.adFlag}
+		  , #{item.attachedFile}
+		  , #{item.msgid}
+		  , #{item.keygen}
+	    )
+	    </foreach>
+	</insert>
+	
+	
+	<insert id="insertSmsWeblinkQueue" parameterType="smsQueueVO">
+		INSERT IGNORE INTO BIZ_MSG
+		(
+			CMID
+		  , UMID
+		  , MSG_TYPE
+		  , STATUS
+		  , REQUEST_TIME
+		  , SEND_TIME
+		  , DEST_PHONE
+		  , SEND_PHONE
+		  , DEST_NAME
+		  , SEND_NAME
+		  , SUBJECT
+		  , MSG_BODY
+		  , NATION_CODE
+		  , SENDER_KEY
+		  , TEMPLATE_CODE
+		  , TIMEOUT
+		  , RE_TYPE
+		  , RE_BODY
+		  , RE_PART
+		  , AD_FLAG
+		  , ATTACHED_FILE
+		  , MSGID
+		  , KEYGEN
+		)
+		VALUES
+		<foreach collection="list" index="index" item="item" separator=",">
+		(
+			MD5(UUID())
+		  , #{item.umid}
+		  , #{item.msgType}
+		  , #{item.status}
+		  , NOW()
+		  , NOW()
+		  , #{item.destPhone}
+		  , #{item.sendPhone}
+		  , #{item.destName}
+		  , #{item.sendName}
+		  , #{item.subject}
+		  , #{item.msgBody}
+		  , #{item.nationCode}
+		  , #{item.senderKey}
+		  , #{item.templateCode}
+		  , #{item.timeout}
+		  , #{item.reType}
+		  , #{item.reBody}
+		  , #{item.rePart}
+		  , #{item.adFlag}
+		  , #{item.weblinkJson}
+		  , #{item.msgid}
+		  , #{item.keygen}
+	    )
+	    </foreach>
+	</insert>
+	
+	<insert id="insertSmsApiStg" parameterType="smsApiVO">
+		INSERT IGNORE INTO NEO_SMS_API_STG 
+			(	
+				REQUESTKEY,
+				REQUESTOPTION,
+				MESSAGENAME,
+				TEMPLATECODE,
+				CAMPAIGNCODE,
+				SENDDUEDATATIME,
+				PAGENUMBER,
+				TOTALPAGENUMBER,
+				PAGESIZE,
+				MEMBERNO,
+				MEMBERNAME,
+				RECEIVEPHONENUMBER,
+				RECEIVEEMAIL,
+				RECEIVEDEVICENO,
+				ENCRYPTIONKEY,
+				BUSINESSKEY,
+				BANKACCOUNT,
+				BANKNAME,
+				SUBJECT,
+				CONTEXT,
+				DEPOSITDUEDATETIME,
+				DEPOSITORNAME,
+				DISTRIBUTORNAME,
+				LICENSEEXPIREDDATECONTEXT,
+				MONEYAMOUNT,
+				ORDERDATECONTEXT,
+				ORDERMONTH,
+				ORDERNO,
+				STORENAME,
+				STOREOWNERUSERNAME,
+				TEMPORARYPASSWORD,
+				VERIFICATIONCODE,
+				WITHDRAWALDATECONTEXT,
+				STATUS,
+				REG_ID,
+				REG_DT,
+				CENTERPHONENUMBER,
+				LINKURLMYOFFICE,
+				MEMBERNUMBER,
+				MAP1,
+				MAP2,
+				MAP3,
+				MAP4,
+				MAP5,
+				MAP6,
+				MAP7,
+				MAP8,
+				MAP9,
+				MAP10
+		)
+		VALUES
+		<foreach collection="list" index="index" item="item" separator=",">
+		(
+			 #{item.requestKey}
+			, #{item.requestoption}
+			, #{item.messagename}
+			, #{item.templatecode}
+			, #{item.campaignno}
+			, #{item.sendduedatatime}
+			, #{item.pagenumber}
+			, #{item.totalpagenumber}
+			, #{item.pagesize}
+			, #{item.memberno}
+			, #{item.membername}
+			, #{item.receivephonenumber}
+			, #{item.receiveemail}
+			, #{item.receivedeviceno}
+			, #{item.encryptionkey}
+			, #{item.businesskey}
+			, #{item.bankaccount}
+			, #{item.bankname}
+			, #{item.subject}
+			, #{item.context}
+			, #{item.depositduedatetime}
+			, #{item.depositorname}
+			, #{item.distributorname}
+			, #{item.licenseexpireddatecontext}
+			, #{item.moneyamount}
+			, #{item.orderdatecontext}
+			, #{item.ordermonth}
+			, #{item.orderno}
+			, #{item.storename}
+			, #{item.storeownerusername}
+			, #{item.temporarypassword}
+			, #{item.verificationcode}
+			, #{item.withdrawaldatecontext}
+			, #{item.status}
+			, #{item.regId}
+			, #{item.regDt}
+			, #{item.centerphonenumber}
+			, #{item.linkurlmyoffice}
+			, #{item.membernumber}
+			, #{item.map1}
+		    , #{item.map2}
+		    , #{item.map3}
+		    , #{item.map4}
+		    , #{item.map5}
+		    , #{item.map6}
+		    , #{item.map7}
+		    , #{item.map8}
+		    , #{item.map9}
+		    , #{item.map10}
+		    )
+		</foreach>
+	</insert>
+	
+	<insert id="insertKkoApiStg" parameterType="smsApiVO">
+		INSERT IGNORE INTO NEO_KAKAOTALK_API_STG 
+			(	
+				REQUESTKEY,
+				REQUESTOPTION,
+				MESSAGENAME,
+				TEMPLATECODE,
+				CAMPAIGNCODE,
+				SENDDUEDATATIME,
+				PAGENUMBER,
+				TOTALPAGENUMBER,
+				PAGESIZE,
+				MEMBERNO,
+				MEMBERNAME,
+				RECEIVEPHONENUMBER,
+				RECEIVEEMAIL,
+				RECEIVEDEVICENO,
+				ENCRYPTIONKEY,
+				BUSINESSKEY,
+				BANKACCOUNT,
+				BANKNAME,
+				SUBJECT,
+				CONTEXT,
+				DEPOSITDUEDATETIME,
+				DEPOSITORNAME,
+				DISTRIBUTORNAME,
+				LICENSEEXPIREDDATECONTEXT,
+				MONEYAMOUNT,
+				ORDERDATECONTEXT,
+				ORDERMONTH,
+				ORDERNO,
+				STORENAME,
+				STOREOWNERUSERNAME,
+				TEMPORARYPASSWORD,
+				VERIFICATIONCODE,
+				WITHDRAWALDATECONTEXT,
+				STATUS,
+				REG_ID,
+				REG_DT,
+				CENTERPHONENUMBER,
+				LINKURLMYOFFICE,
+				MEMBERNUMBER,
+				MAP1,
+				MAP2,
+				MAP3,
+				MAP4,
+				MAP5,
+				MAP6,
+				MAP7,
+				MAP8,
+				MAP9,
+				MAP10
+		)
+		VALUES
+		<foreach collection="list" index="index" item="item" separator=",">
+		(
+			 #{item.requestKey}
+			, #{item.requestoption}
+			, #{item.messagename}
+			, #{item.templatecode}
+			, #{item.campaignno}
+			, #{item.sendduedatatime}
+			, #{item.pagenumber}
+			, #{item.totalpagenumber}
+			, #{item.pagesize}
+			, #{item.memberno}
+			, #{item.membername}
+			, #{item.receivephonenumber}
+			, #{item.receiveemail}
+			, #{item.receivedeviceno}
+			, #{item.encryptionkey}
+			, #{item.businesskey}
+			, #{item.bankaccount}
+			, #{item.bankname}
+			, #{item.subject}
+			, #{item.context}
+			, #{item.depositduedatetime}
+			, #{item.depositorname}
+			, #{item.distributorname}
+			, #{item.licenseexpireddatecontext}
+			, #{item.moneyamount}
+			, #{item.orderdatecontext}
+			, #{item.ordermonth}
+			, #{item.orderno}
+			, #{item.storename}
+			, #{item.storeownerusername}
+			, #{item.temporarypassword}
+			, #{item.verificationcode}
+			, #{item.withdrawaldatecontext}
+			, #{item.status}
+			, #{item.regId}
+			, #{item.regDt}
+			, #{item.centerphonenumber}
+			, #{item.linkurlmyoffice}
+			, #{item.membernumber}
+			, #{item.map1}
+		    , #{item.map2}
+		    , #{item.map3}
+		    , #{item.map4}
+		    , #{item.map5}
+		    , #{item.map6}
+		    , #{item.map7}
+		    , #{item.map8}
+		    , #{item.map9}
+		    , #{item.map10}
+		    )
+		</foreach>
+	</insert>
+	
+	<insert id="insertNeoSms" parameterType="SmsApiVO">
+		
+	INSERT IGNORE INTO NEO_SMS 
+		( 
+			MSGID 
+		  , KEYGEN
+		  , NUM_VAL
+		  , REQUEST_KEY 
+		  , STATUS
+		  , SEG_NO 
+		  , SMS_NAME 
+		  , SMS_MESSAGE
+		  , GUBUN 
+		  , PLAN_USER_ID
+		  , USER_ID
+		  , DEPT_NO
+		  , SEND_TELNO
+		  , CAMPUS_NO
+		  , SEND_YM
+		  , SEND_DATE
+		  , TASK_NM
+		  , SMS_STATUS
+		  , SEND_NM
+		  , SEND_TYP
+		  , REG_ID
+		  , REG_DT
+		  , EXE_USER_ID
+		  , TEMP_CD
+		  , SEND_START_DT
+		) 
+		VALUES
+		(
+			'999999||'
+		  ,  #{requestKey}
+		  ,  NEO_SMS_SEQ('NEXTVAL')
+		  , #{requestKey}
+		  , '001'
+		  , (SELECT SEG_NO FROM NEO_SMS_TEMPLATE WHERE TEMP_CD=#{templatecode})
+		  , (SELECT TEMP_SUBJECT FROM NEO_SMS_TEMPLATE WHERE TEMP_CD=#{templatecode}) 
+		  , (SELECT TEMP_CONTENT FROM NEO_SMS_TEMPLATE WHERE TEMP_CD=#{templatecode})
+		  , (SELECT GUBUN FROM NEO_SMS_TEMPLATE WHERE TEMP_CD=#{templatecode})
+		  , #{planUserId}
+		  , #{userId}
+		  , #{deptNo}
+		  , #{senderphonenumber}
+		  , #{campaignno}
+		  , #{sendYm}
+		  , #{sendduedatatime}
+		  , (SELECT TEMP_SUBJECT FROM NEO_SMS_TEMPLATE WHERE TEMP_CD=#{templatecode}) 
+		  , #{smsStatus}
+		  , #{sendNm}
+		  , #{sendTyp}
+		  , #{regId}
+		  , #{sendduedatatime}
+		  , #{exeUserId}
+		  , #{templatecode}
+		  , #{sendStartDt}
+		   
+	    )
+	</insert>
+	
+	
+	<insert id="insertNeoSmsKko" parameterType="SmsApiVO">
+		
+	INSERT IGNORE INTO NEO_SMS 
+		( 
+			MSGID 
+		  , KEYGEN
+		  , NUM_VAL
+		  , REQUEST_KEY 
+		  , STATUS
+		  , SEG_NO 
+		  , SMS_NAME 
+		  , SMS_MESSAGE
+		  , GUBUN 
+		  , PLAN_USER_ID
+		  , USER_ID
+		  , DEPT_NO
+		  , SEND_TELNO
+		  , CAMPUS_NO
+		  , SEND_YM
+		  , SEND_DATE
+		  , TASK_NM
+		  , SMS_STATUS
+		  , SEND_NM
+		  , SEND_TYP
+		  , REG_ID
+		  , REG_DT
+		  , EXE_USER_ID
+		  , TEMP_CD
+		  , SEND_START_DT
+		
+		) 
+		VALUES
+		(
+			'999999||'
+		  ,  #{requestKey}
+		  ,  NEO_SMS_SEQ('NEXTVAL')
+		  , #{requestKey}
+		  , '001'
+		  , (SELECT SEG_NO FROM NEO_SMS_TEMPLATE WHERE TEMP_CD=#{templatecode}) <!-- 여기는 SMS 템플릿 사용 -->
+		  , (SELECT TEMP_NM FROM NEO_KAKAOTALK_TEMPLATE WHERE TEMP_CD=#{templatecode}) 
+		  , (SELECT TEMP_MAPP_CONTENT FROM NEO_KAKAOTALK_TEMPLATE WHERE TEMP_CD=#{templatecode})
+		  , #{gubun}
+		  , #{planUserId}
+		  , #{userId}
+		  , #{deptNo}
+		  , #{senderphonenumber}
+		  , #{campaignno}
+		  , #{sendYm}
+		  , #{sendduedatatime}
+		  , (SELECT TEMP_NM FROM NEO_KAKAOTALK_TEMPLATE WHERE TEMP_CD=#{templatecode}) 
+		  , #{smsStatus}
+		  , #{sendNm}
+		  , #{sendTyp}
+		  , #{regId}
+		  , #{sendduedatatime}
+		  , #{exeUserId}
+		  , #{templatecode}
+		  , #{sendStartDt}
+		   
+	    )
+	</insert>
+	
+	<insert id="insertSmsLog" parameterType="smsSendLogVO">
+		INSERT INTO NEO_SMSLOG
+		(   MSGID
+		  , KEYGEN
+		  , PHONE
+		  , SEND_DT
+		  , RETRY_CNT
+		  , ID
+		  , NAME
+		  , EMAIL
+		  , ENCKEY
+		  , BIZKEY
+		  , USER_ID
+		  , DEPT_NO
+		  , SEND_TYP
+		  , MSG_TYP
+		  , REG_DT
+		  , CMID
+		  , UMID
+		  , SEND_TELNO
+		  , SEND_NM
+		  , PRT_DT
+		  , RSLT_CD
+		  , RCODE
+		  , RE_TYPE
+		  , RE_TYPE01
+		  , RE_TYPE02
+		  , RE_TYPE03
+		)
+		VALUES
+		(
+			#{msgid}
+		  , #{keygen}
+		  , #{phone}
+		  , #{sendDt}
+		  , #{retryCnt}
+		  , #{id}
+		  , #{name}
+		  , #{email}
+		  , #{enckey}
+		  , #{bizkey}
+		  , #{userId}
+		  , #{deptNo}
+		  , #{sendTyp}
+		  , #{msgTyp}
+		  , #{regDt}
+		  , #{cmid}
+		  , #{umid}
+		  , #{sendTelno}
+		  , #{sendNm}
+		  , #{prtDt}
+		  , #{rsltCd}
+		  , #{rcode}
+		  , #{reType}
+		  , #{reType01}
+		  , #{reType02}
+		  , #{reType03}
+		)
+	</insert> 
+	
+	<select id="getSegment" parameterType="_int" resultType="segmentVO">
+		SELECT SEG_NO 
+			 , DB_CONN_NO
+			 , SEG_NM
+			 , SEG_DESC
+			 , CREATE_TY
+			 , SELECT_	SELECT_SQL
+			 , FROM_ FROM_SQL
+			 , WHERE_ WHERE_SQL
+			 , ORDERBY_ ORDERBY_SQL
+			 , QUERY
+			 , MERGE_KEY
+			 , MERGE_COL
+			 , SEG_FL_PATH
+			 , SRC_WHERE
+		  FROM NEO_SEGMENT
+		 WHERE SEG_NO = #{segNo}
+	</select>
+	
+	<select id="getKakaoTemplateMergeList" parameterType="smsApiVO" resultType="smsApiVO">
+		SELECT Y.MERGY_ITEM
+			 , Z.KAKAO_COL 
+			 , Z.MERGE_COL AS KAKAO_MERGE_COL
+		  FROM NEO_SMS X
+		  	   INNER JOIN NEO_KAKAOTALK_TEMPLATE Y ON (X.TEMP_CD = Y.TEMP_CD)
+		  	   LEFT OUTER JOIN NEO_KAKAOTEMPLE_ITEM Z ON ( X.MSGID  = Z.MSGID AND X.KEYGEN  = Z.KEYGEN )
+		 WHERE X.MSGID  = #{msgid}
+		   AND X.KEYGEN = #{keygen}
+	</select>
+	
+	<select id="getSmsAttachList" parameterType="smsAttachVO" resultType="smsAttachVO">
+		SELECT ATT_NM
+			 , ATT_FL_PATH
+			 , MSGID
+			 , KEYGEN
+			 , ATT_FL_SIZE
+			 , ATT_FL_TY
+			 , ENCRYPT_YN
+			 , ENCRYPT_KEY
+			 , ENCRYPT_TY
+			 , ATT_PRIVIEW_PATH
+		  FROM NEO_ATTACH_SMS
+		 WHERE MSGID = #{msgid}
+		   AND KEYGEN = #{keygen}
+	</select>
+	
+	<select id="getDbConnInfo" parameterType="_int" resultType="dbConnVO">
+		SELECT DB_CONN_NO
+			 , DB_CONN_NM
+			 , DB_TY
+			 , DB_DRIVER
+			 , DB_URL
+			 , DB_CHAR_SET
+			 , LOGIN_ID
+			 , LOGIN_PWD
+		  FROM NEO_DBCONN 
+		 WHERE DB_CONN_NO = #{dbConnNo}
+	</select>
+	
+	<delete id="deleteApiDel">
+	<![CDATA[  
+		DELETE FROM NEO_SMS_API_STG 
+		WHERE   SENDDUEDATATIME  <  DATE_FORMAT(DATE_ADD(NOW(), INTERVAL -1 MONTH), "%Y%m%d")
+	 ]]>
+	</delete> 
+
+
+	<delete id="deleteKkoApiDel">
+	<![CDATA[  
+		DELETE FROM NEO_KAKAOTALK_API_STG 
+		WHERE   SENDDUEDATATIME  <  DATE_FORMAT(DATE_ADD(NOW(), INTERVAL -1 MONTH), "%Y%m%d")
+	 ]]>
+	</delete> 
+	
+</mapper>

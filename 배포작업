@@ -1,0 +1,72 @@
+
+###############################
+배포 전 설정
+###############################
+
+	1. 개발/운영 DB설정하기
+	applicationContext.xml
+	
+	
+		<local>
+		<context:property-placeholder  order="2" ignore-unresolvable="true"  location="classpath:config/databaseLoc.properties" />
+		<!-- <context:property-placeholder location="classpath:config/databaseDev.properties" />  -->
+		<!-- <context:property-placeholder location="classpath:config/databaseProd.properties" />  -->  
+	
+		<개발>
+		<!-- <context:property-placeholder  order="2" ignore-unresolvable="true"  location="classpath:config/databaseLoc.properties" /> -->
+		<context:property-placeholder location="classpath:config/databaseDev.properties" />
+		<!-- <context:property-placeholder location="classpath:config/databaseProd.properties" />  -->  
+		
+		<운영>
+		<!-- <context:property-placeholder  order="2" ignore-unresolvable="true"  location="classpath:config/databaseLoc.properties" /> -->
+		<!-- <context:property-placeholder location="classpath:config/databaseDev.properties" />  -->
+		<context:property-placeholder location="classpath:config/databaseProd.properties" />
+		 
+		 
+	2. 파일업로드 경로 변경하기
+	engine.properties
+	
+		<local>
+			FILE.UPLOAD_PATH=C:/mpv3/AXON_UMS/front/upload
+			#FILE.UPLOAD_PATH=/home/ec2-user/AXON_UMS/front/upload
+			
+		<개발,베타>
+			#FILE.UPLOAD_PATH=C:/mpv3/AXON_UMS/front/upload
+			FILE.UPLOAD_PATH=/home/ec2-user/AXON_UMS/front/upload
+			
+		<운영>
+			#FILE.UPLOAD_PATH=C:/mpv3/AXON_UMS/front/upload
+			FILE.UPLOAD_PATH=/home/ec2-user/AXON_UMS/front/upload
+			
+			
+			
+	3. BIZ_LOG_XXXXXX 테이블 찾기
+	smslog-mapping-mysql.xml
+	
+	
+		<local>
+			WHERE TABLE_SCHEMA = 'UMS_DB'
+			
+		<개발,베타>
+			WHERE TABLE_SCHEMA = 'UMS'
+		
+		<운영>
+			WHERE TABLE_SCHEMA = 'UMS'
+		
+		
+	4. API 폴더 경로 설정
+		engine.properties
+		<local>			
+			SMS.API.UPLOAD = E:/mpv3/AXON_UMS/front/upload/api.sms
+			KKO.API.UPLOAD = E:/mpv3/AXON_UMS/front/upload/api/kakao
+		
+		<개발,베타,운영>
+			SMS.API.UPLOAD = /home/ec2-user/AXON_UMS/front/upload/api/sms
+			KKO.API.UPLOAD = /home/ec2-user/AXON_UMS/front/upload/api/kakao			
+			
+		
+###############################		
+배포 파일 생성
+###############################
+	우클릭 > run as >  maven install		
+	engine-0.0.1.jar

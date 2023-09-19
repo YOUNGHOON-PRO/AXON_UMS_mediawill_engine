@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="SmsLogDAO">
+		
+	<select id="getSmsLogTable" resultType="smsLogVO">
+		SELECT IF(
+	   			 (SELECT COUNT(*) 
+	       			FROM INFORMATION_SCHEMA.TABLES
+	        	   WHERE TABLE_SCHEMA = 'UMS'
+	                 AND TABLE_NAME = CONCAT('BIZ_LOG_',DATE_FORMAT(NOW(), "%Y%m"))) > 0
+	             , (SELECT CONCAT('BIZ_LOG_',DATE_FORMAT(NOW(), "%Y%m")) FROM DUAL) 
+	             , 0
+    			) AS SMSLOGTABLE
+	</select>
+
+	<select id="getSmsLogData" parameterType="smsLogVO" resultType="smsLogVO">
+		 <![CDATA[
+		 SELECT 
+		   CASE WHEN A.MSGID IS NULL THEN '999999||'
+		   	ELSE A.MSGID 
+		   END MSGID
+		 , CASE WHEN A.KEYGEN IS NULL THEN (SELECT DATE_FORMAT(SEND_TIME, "%Y%m%d999999"))
+		   	ELSE A.KEYGEN 
+		   END KEYGEN
+		 , A.DEST_PHONE
+		 , DEST_NAME
+		 , DEST_PHONE AS ID  
+		 , DATE_FORMAT(A.SEND_TIME, "%Y%m%d%H%i%s") as SEND_TIME 
+		 , '2' as RETRY_CNT 
+		 , B.USER_ID
+		 , B.DEPT_NO
+		 , B.SEND_TYP 
+		 , A.MSG_TYPE
+		 , DATE_FORMAT(A.REQUEST_TIME, "%Y%m%d%H%i%s") AS REQUEST_TIME 
+		 , A.CMID
+		 , A.SEND_PHONE
+		 , A.STATUS
+		 , A.CALL_STATUS
+		 , A.SUBJECT
+		 , A.MSG_BODY
+		 , A.ATTACHED_FILE
+		 , A.TEMPLATE_CODE 
+		 , B.CAMPUS_NO
+		 , CASE 
+			 WHEN A.CALL_STATUS='6600'
+			 THEN '1'
+			 WHEN A.CALL_STATUS='7000'
+			 THEN '1'
+			  WHEN A.CALL_STATUS='4100'
+			 THEN '1'
+			 ELSE '0'
+		   END AS RSLT_CD         
+		  FROM ${smsLogTable} A
+		   LEFT OUTER JOIN NEO_SMS B ON
+			   A.KEYGEN = B.KEYGEN
+		 WHERE
+			  IFNULL(DATE_FORMAT(A.REQUEST_TIME,"%Y%m%d%H%i%s"),CONCAT(DATE_FORMAT(NOW(), "%Y%m"), '01000000'))  
+		  > (SELECT IFNULL(MAX(DATE_FORMAT(REG_DT, "%Y%m%d%H%i%s")), CONCAT(DATE_FORMAT(NOW(), "%Y%m"), '01000000')) FROM NEO_SMSLOG)
+		  AND SEND_TIME >='20221124170000' 
+		  ORDER BY A.REQUEST_TIME ASC;
+		  ]]>
+	</select>
+	
+	<insert id="insertNeosmsData" parameterType="smsLogVO" >
+		<!--   <![CDATA[ 
+		 INSERT IGNORE INTO NEO_SMS ( MSGID , KEYGEN, NUM_VAL, SEG_NO, SMS_NAME, SMS_MESSAGE, GUBUN, PLAN_USER_ID, USER_ID ,DEPT_NO, SEND_TELNO, CAMPUS_NO, SEND_YM, SEND_DATE, TASK_NM, SMS_STATUS, STATUS, SEND_NM, SEND_TYP, REG_ID, REG_DT, EXE_USER_ID )
+		SELECT AA.MSGID, AA.KEYGEN, NEO_SMS_SEQ('NEXTVAL'),SEG_NO, SMS_NAME, SMS_MESSAGE, GUBUN, PLAN_USER_ID, USER_ID ,DEPT_NO, SEND_TELNO, CAMPUS_NO, SEND_YM, SEND_DATE, TASK_NM, SMS_STATUS, STATUS, SEND_NM, SEND_TYP, REG_ID, REG_DT, EXE_USER_ID
+		FROM (
+				 SELECT DISTINCT DATE_FORMAT(SEND_TIME , '%Y%m%d') AS SEND_YMD 
+					, '999999||' AS MSGID
+					, CONCAT( DATE_FORMAT(SEND_TIME , '%Y%m%d') , '999999') AS KEYGEN
+				    , (SELECT SEG_NO FROM NEO_SMS_TEMPLATE WHERE TEMP_CD= #{templateCode}) AS SEG_NO
+				    , SUBJECT AS SMS_NAME 
+				    , MSG_BODY AS SMS_MESSAGE
+				    , CASE
+						WHEN MSG_TYPE=0
+						THEN '000'
+						WHEN MSG_TYPE=5
+						THEN '001'
+					END AS GUBUN 
+				    , (SELECT USER_ID FROM NEO_SMS_TEMPLATE WHERE TEMP_CD=#{templateCode}) AS PLAN_USER_ID
+				    , (SELECT USER_ID FROM NEO_SMS_TEMPLATE WHERE TEMP_CD=#{templateCode}) AS USER_ID
+				    , (SELECT DEPT_NO FROM NEO_SMS_TEMPLATE WHERE TEMP_CD=#{templateCode}) AS DEPT_NO
+				    , SEND_PHONE AS SEND_TELNO
+				    , (SELECT CAMP_NO FROM NEO_SMS_TEMPLATE WHERE TEMP_CD=#{templateCode}) AS CAMPUS_NO
+				    , (IFNULL(DATE_FORMAT(REQUEST_TIME ,"%Y%m"),CONCAT(DATE_FORMAT(NOW(), "%Y%m"), '01000000'))) AS SEND_YM 
+				    , (IFNULL(DATE_FORMAT(REQUEST_TIME ,"%Y%m%d%H%i%s"),CONCAT(DATE_FORMAT(NOW(), "%Y%m"), '01000000'))) AS SEND_DATE
+				    , SUBJECT AS TASK_NM
+				    , '000' AS SMS_STATUS
+				    , '003' AS STATUS
+				    , SEND_NAME AS SEND_NM
+				    , '001' AS SEND_TYP
+				    , (SELECT USER_ID FROM NEO_SMS_TEMPLATE WHERE TEMP_CD=#{templateCode}) AS REG_ID
+				    , (IFNULL(DATE_FORMAT(REQUEST_TIME ,"%Y%m%d%H%i%s"),CONCAT(DATE_FORMAT(NOW(), "%Y%m"), '01000000'))) AS REG_DT
+				    , (SELECT USER_ID FROM NEO_SMS_TEMPLATE WHERE TEMP_CD='M004') AS EXE_USER_ID
+				   FROM ${smsLogTable} 
+				  WHERE KEYGEN IS NULL AND MSGID IS NULL AND MSGID IS NULL AND SEND_TIME >='20221124170000') AA
+		WHERE NOT EXISTS ( SELECT 1 AS ID FROM NEO_SMS BB WHERE BB.MSGID = AA.MSGID AND AA.KEYGEN = BB.KEYGEN );	 
+		]]>
+		-->
+		<![CDATA[ 
+		INSERT IGNORE INTO NEO_SMS ( 
+				  MSGID 
+				, KEYGEN
+				, NUM_VAL
+				, SEG_NO
+				, SMS_NAME
+				, SMS_MESSAGE
+				, GUBUN
+				, PLAN_USER_ID
+				, USER_ID 
+				, DEPT_NO
+				, SEND_TELNO
+				, CAMPUS_NO
+				, SEND_YM
+				, SEND_DATE
+				, TASK_NM
+				, SMS_STATUS
+				, STATUS
+				, SEND_NM
+				, SEND_TYP
+				, REG_ID
+				, REG_DT
+				, EXE_USER_ID )
+		VALUES (  
+				  #{msgid}
+				, #{keygen}
+				, NEO_SMS_SEQ('NEXTVAL')
+				, (SELECT SEG_NO FROM NEO_SMS_TEMPLATE WHERE TEMP_CD=#{templateCode})
+				, #{subject}
+				, #{msgBody}
+				, #{gubun}
+				, (SELECT USER_ID FROM NEO_SMS_TEMPLATE WHERE TEMP_CD=#{templateCode})
+				, (SELECT USER_ID FROM NEO_SMS_TEMPLATE WHERE TEMP_CD=#{templateCode})
+				, (SELECT DEPT_NO FROM NEO_SMS_TEMPLATE WHERE TEMP_CD=#{templateCode})
+				, #{sendPhone}
+				, #{campusNo}
+				, (IFNULL(DATE_FORMAT(#{requestTime} ,"%Y%m"),CONCAT(DATE_FORMAT(NOW(), "%Y%m"), '01000000')))
+				, (IFNULL(DATE_FORMAT(#{requestTime} ,"%Y%m%d%H%i%s"),CONCAT(DATE_FORMAT(NOW(), "%Y%m"), '01000000')))
+				, #{subject}
+				, '000'
+				, '003'
+				, #{sendName}
+				, '001'
+				, (SELECT USER_ID FROM NEO_SMS_TEMPLATE WHERE TEMP_CD=#{templateCode})
+				, (IFNULL(DATE_FORMAT(#{requestTime} ,"%Y%m%d%H%i%s"),CONCAT(DATE_FORMAT(NOW(), "%Y%m"), '01000000')))
+				, (SELECT USER_ID FROM NEO_SMS_TEMPLATE WHERE TEMP_CD=#{templateCode})
+				)
+		]]>
+	</insert>
+	
+
+	<insert id="insertSmsLogData" parameterType="smsLogVO" >
+		INSERT IGNORE INTO NEO_SMSLOG (
+			  	MSGID 
+			  , KEYGEN 
+			  , PHONE 
+			  , ID
+			  , NAME
+			  , SEND_DT 
+			  , RETRY_CNT 
+			  , USER_ID
+			  , DEPT_NO
+			  , SEND_TYP
+			  , MSG_TYP
+			  , REG_DT
+			  , CMID 
+			  , SEND_TELNO
+			  , RSLT_CD
+			  , RCODE
+			  , SUBJECT
+			  , MSG_BODY
+			  , ATTACHED_FILE
+			  , CAMP_NO
+			  , SMS_SEND_YN)
+		VALUES (#{msgid}
+			  , #{keygen}
+			  , #{destPhone}
+			  , #{id}
+			  , #{destName}
+			  , #{sendTime}
+			  , #{retryCnt}
+			  , #{userId}
+			  , #{deptNo}
+			  , #{sendTyp}
+			  , #{msgType}
+			  , #{requestTime}
+			  , #{cmid}
+			  , #{sendPhone}
+			  , #{rsltCd}
+			  , #{callStatus}
+			  , #{subject}
+			  , #{msgBody}
+			  , #{attachedFile}
+			  , #{campusNo} 
+			  , #{smsSendYn})			  
+	</insert>
+
+
+</mapper>

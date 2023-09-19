@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration>
+<configuration scan="true" scanPeriod="60 seconds">
+	<property name="LOG_PATH" value="logs"/>
+	<property name="LOG_FILE_NAME" value="engineLog"/>
+	<property name="ERR_LOG_FILE_NAME" value="err_engineLog"/>
+	<property name="SEND_ERR_FILE_NAME" value="send_err_engineLog"/>
+	<property name="LOG_PATTERN" value="%-5level %d{yy-MM-dd HH:mm:ss}[%thread] [%logger{0}:%line] - %msg%n"/>
+
+	<!-- Console Appender -->
+	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender"> 
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder"> 
+		<pattern>${LOG_PATTERN}</pattern>
+		</encoder>
+	</appender>
+	
+	<!-- File Appender -->
+	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender"> 
+		<!-- 파일경로 설정 --> 
+		<file>${LOG_PATH}/${LOG_FILE_NAME}.log</file> 
+		<!-- 출력패턴 설정--> 
+		<append>true</append>
+		<!-- Rolling 정책 --> 
+		<rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">  
+			<fileNamePattern>${LOG_PATH}/${LOG_FILE_NAME}.%d{yyyy-MM-dd}_%i.log</fileNamePattern>
+			<maxFileSize>10MB</maxFileSize>
+			<maxHistory>30</maxHistory>
+		</rollingPolicy>
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder"> 
+			<pattern>${LOG_PATTERN}</pattern> 
+		</encoder> 
+	</appender>
+	
+	<!-- 에러의 경우 파일에 로그 처리 -->
+	<appender name="Error" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<filter class="ch.qos.logback.classic.filter.LevelFilter">
+			<level>error</level>
+			<onMatch>ACCEPT</onMatch>
+			<onMismatch>DENY</onMismatch>
+		</filter> 
+		<file>${LOG_PATH}/${ERR_LOG_FILE_NAME}.log</file>
+			<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+		<pattern>${LOG_PATTERN}</pattern>
+		</encoder>
+		<!-- Rolling 정책 -->
+		<rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+			<fileNamePattern>${LOG_PATH}/${ERR_LOG_FILE_NAME}.%d{yyyy-MM-dd}_%i.log</fileNamePattern>
+			<maxFileSize>10MB</maxFileSize>
+			<maxHistory>60</maxHistory>
+		</rollingPolicy>
+	</appender>
+	
+	<!-- 특정패키지 로깅레벨 설정 -->
+	<logger name="kr.co.enders" level="DEBUG"/>
+	<logger name="org.springframework" level="INFO"/>
+	<logger name="org.apache.mybatis" level="DEBUG"/>
+
+	<!-- root레벨 설정 -->
+	<root level="Error">
+		<appender-ref ref="CONSOLE"/>
+		<appender-ref ref="FILE"/>
+		<appender-ref ref="Error"/>
+	</root>
+	
+</configuration>

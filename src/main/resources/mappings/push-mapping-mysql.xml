@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="PushDAO">
+	
+	<update id="updatePush">
+		UPDATE NEO_PUSHMESSAGE
+		   <!-- SET SEND_START_DT=#{sendStartDt}, STATUS=#{status} -->
+		   SET WORK_STATUS=#{workStatus}
+		 WHERE PUSHMESSAGE_ID = #{pushmessageId}
+	</update>
+	
+	<select id="getPush" resultType="pushVO">
+		SELECT * FROM NEO_PUSHMESSAGE
+		 WHERE PUSHMESSAGE_ID = #{pushmessageId}
+	</select>
+	
+	<select id="getPushListTarget" resultType="pushVO">
+		SELECT PUSHMESSAGE_ID
+			 , USER_ID
+			 , DEPT_NO
+			 , SEG_NO
+			 , SEND_TELNO
+			 , CAMP_NO
+			 , PUSH_NAME
+			 , PUSH_MESSAGE
+			 , PUSH_GUBUN
+			 , FILE_PATH
+			 , CALL_URI
+			 , CALL_URI_IOS
+			 , OS_GUBUN
+			 , PUSH_TITLE
+			 , SMS_YN
+			 , SEND_REPEAT
+			 , SEND_TERM_LOOP
+			 , SEND_TERM_END_DT
+			 , SEND_TERM_LOOP_TY
+			 , SEND_DT
+			 , SEND_END_DT
+			 , WORK_STATUS
+			 , STATUS
+			 , CALL_URL_TYP
+			 , SEND_TYP
+			 , FILE_NM
+			 , FILE_SIZE
+		  FROM NEO_PUSHMESSAGE
+		 WHERE WORK_STATUS = #{workStatus}
+		   AND STATUS = #{status}
+		   AND SEND_DT &lt;= #{sendDt}
+	</select>
+	
+	<update id="updatePushStatus">
+		UPDATE NEO_PUSHMESSAGE
+		   <!-- SET SEND_START_DT=#{sendStartDt}, STATUS=#{status} -->
+		   SET WORK_STATUS=#{workStatus}
+		 WHERE PUSHMESSAGE_ID = #{pushmessageId}
+	</update>
+	
+	<insert id="insertPushQueue" parameterType="pushQueueVO">
+		INSERT INTO NEO_PUSHQUEUE
+		(
+			PUSHMESSAGE_ID
+		  , DEVICE_IDENTI_NO
+		  , ID
+		  , NAME
+		  , USER_ID
+		  , DEPT_NO
+		  , SEND_DT
+		  , PUSH_TITLE
+		  , PUSH_MESSAGE
+		  , PUSH_GUBUN
+		  , FILE_PATH
+		  , FILE_NM
+		  , FILE_SIZE
+		  , SEND_TYP
+		  , OS_GUBUN
+		  , SMS_YN
+		  , CALL_URL_TYP
+		  , CALL_URI
+		  , REG_ID
+		  , REG_DT
+		)
+		VALUES
+		(
+			#{pushmessageId}
+		  , #{deviceIdentiNo}
+		  , #{id}
+		  , #{name}
+		  , #{userId}
+		  , #{deptNo}
+		  , #{sendDt}
+		  , #{pushTitle}
+		  , #{pushMessage}
+		  , #{pushGubun}
+		  , #{filePath}
+		  , #{fileNm}
+		  , #{fileSize}
+		  , #{sendTyp}
+		  , #{osGubun}
+		  , #{smsYn}
+		  , #{callUrlTyp}
+		  , #{callUri}
+		  , #{regId}
+		  , #{regDt}
+	    )
+	</insert> 
+	
+	<insert id="insertPushLog" parameterType="pushSendLogVO">
+		INSERT INTO NEO_PUSHLOG
+		(
+			PUSHMESSAGE_ID
+		  , DEVICE_IDENTI_NO
+		  , ID
+		  , NAME
+		  , USER_ID
+		  , DEPT_NO
+		  , SEND_DT
+		  , PUSH_GUBUN
+		  , OS_GUBUN
+		  , SMS_YN
+		  , REG_DT
+		  , RETRY_CNT
+		  , RCODE
+		  , RSLT_CD
+		)
+		VALUES
+		(
+			#{pushmessageId}
+		  , #{deviceIdentiNo}
+		  , #{id}
+		  , #{name}
+		  , #{userId}
+		  , #{deptNo}
+		  , #{sendDt}
+		  , #{pushGubun}
+		  , #{osGubun}
+		  , #{smsYn}
+		  , #{regDt}
+		  , #{retryCnt}
+		  , #{rcode}
+		  , #{rsltCd}
+	    )
+	</insert> 
+	
+	<select id="getSegment" parameterType="_int" resultType="segmentVO">
+		SELECT SEG_NO 
+			 , DB_CONN_NO
+			 , SEG_NM
+			 , SEG_DESC
+			 , CREATE_TY
+			 , SELECT_	SELECT_SQL
+			 , FROM_ FROM_SQL
+			 , WHERE_ WHERE_SQL
+			 , ORDERBY_ ORDERBY_SQL
+			 , QUERY
+			 , MERGE_KEY
+			 , MERGE_COL
+			 , SEG_FL_PATH
+			 , SRC_WHERE
+		  FROM NEO_SEGMENT
+		 WHERE SEG_NO = #{segNo}
+	</select>
+	
+	<select id="getDbConnInfo" parameterType="_int" resultType="dbConnVO">
+		SELECT DB_CONN_NO
+			 , DB_CONN_NM
+			 , DB_TY
+			 , DB_DRIVER
+			 , DB_URL
+			 , DB_CHAR_SET
+			 , LOGIN_ID
+			 , LOGIN_PWD
+		  FROM NEO_DBCONN 
+		 WHERE DB_CONN_NO = #{dbConnNo}
+	</select>
+</mapper>

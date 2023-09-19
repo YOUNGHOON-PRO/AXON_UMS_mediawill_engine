@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="PushApiDAO">
+	
+	<insert id="insertPushApiStg" parameterType="pushApiVO">
+		INSERT IGNORE INTO NEO_PUSH_API_STG 
+			(	
+				REQUESTKEY,
+				REQUESTOPTION,
+				MESSAGENAME,
+				TEMPLATECODE,
+				CAMPAIGNCODE,
+				SENDDUEDATATIME,
+				PAGENUMBER,
+				TOTALPAGENUMBER,
+				PAGESIZE,
+				MEMBERNO,
+				MEMBERNAME,
+				RECEIVEPHONENUMBER,
+				RECEIVEEMAIL,
+				RECEIVEDEVICENO,
+				ENCRYPTIONKEY,
+				BUSINESSKEY,
+				BANKACCOUNT,
+				BANKNAME,
+				SUBJECT,
+				CONTEXT,
+				DEPOSITDUEDATETIME,
+				DEPOSITORNAME,
+				DISTRIBUTORNAME,
+				LICENSEEXPIREDDATECONTEXT,
+				MONEYAMOUNT,
+				ORDERDATECONTEXT,
+				ORDERMONTH,
+				ORDERNO,
+				STORENAME,
+				STOREOWNERUSERNAME,
+				TEMPORARYPASSWORD,
+				VERIFICATIONCODE,
+				WITHDRAWALDATECONTEXT,
+				STATUS,
+				REG_ID,
+				REG_DT,
+				CENTERPHONENUMBER,
+				LINKURLMYOFFICE,
+				MEMBERNUMBER,
+				MAP1,
+				MAP2,
+				MAP3,
+				MAP4,
+				MAP5,
+				MAP6,
+				MAP7,
+				MAP8,
+				MAP9,
+				MAP10,
+				MAP11,
+				MAP12,
+				MAP13,
+				MAP14,
+				MAP15
+		)
+		VALUES
+		<foreach collection="list" index="index" item="item" separator=",">
+		(
+			 #{item.requestKey}
+			, #{item.requestoption}
+			, #{item.messagename}
+			, #{item.templatecode}
+			, #{item.campaigncode}
+			, #{item.sendduedatatime}
+			, #{item.pagenumber}
+			, #{item.totalpagenumber}
+			, #{item.pagesize}
+			, #{item.memberno}
+			, #{item.membername}
+			, #{item.receivephonenumber}
+			, #{item.receiveemail}
+			, #{item.receivedeviceno}
+			, #{item.encryptionkey}
+			, #{item.businesskey}
+			, #{item.bankaccount}
+			, #{item.bankname}
+			, #{item.subject}
+			, #{item.context}
+			, #{item.depositduedatetime}
+			, #{item.depositorname}
+			, #{item.distributorname}
+			, #{item.licenseexpireddatecontext}
+			, #{item.moneyamount}
+			, #{item.orderdatecontext}
+			, #{item.ordermonth}
+			, #{item.orderno}
+			, #{item.storename}
+			, #{item.storeownerusername}
+			, #{item.temporarypassword}
+			, #{item.verificationcode}
+			, #{item.withdrawaldatecontext}
+			, #{item.status}
+			, #{item.regId}
+			, #{item.regDt}
+			, #{item.centerphonenumber}
+			, #{item.linkurlmyoffice}
+			, #{item.membernumber}
+			, #{item.map1}
+		    , #{item.map2}
+		    , #{item.map3}
+		    , #{item.map4}
+		    , #{item.map5}
+		    , #{item.map6}
+		    , #{item.map7}
+		    , #{item.map8}
+		    , #{item.map9}
+		    , #{item.map10}
+		    , #{item.map11}
+		    , #{item.map12}
+		    , #{item.map13}
+		    , #{item.map14}
+		    , #{item.map15}
+		    )
+		</foreach>
+	</insert>
+	
+</mapper>

@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="SmsDAO">
+	<select id="getSmsListTarget" resultType="smsVO">
+		SELECT MSGID
+			 , KEYGEN
+			 , USER_ID
+			 , (SELECT USER_NM FROM NEO_USER WHERE USER_ID = NEO_SMS.USER_ID ) USER_NM
+			 , DEPT_NO
+			 , SEG_NO
+			 , SEND_TELNO
+			 , CAMPUS_NO
+			 , SEND_DATE
+			 , SMS_NAME
+			 , SMS_MESSAGE
+			 , STATUS
+			 , GUBUN
+			 , LEGAL_YN
+			 , LEGAL_CF
+			 , TASK_NM
+			 , SMS_STATUS
+			 , SEND_NM
+			 , SEND_TYP
+			 , TEMP_CD
+		  FROM NEO_SMS
+		 WHERE STATUS = #{status}
+		   AND SMS_STATUS = #{smsStatus}
+		   AND SEND_DATE &lt;= #{sendDate}
+		   AND REQUEST_KEY IS NULL
+		 GROUP BY MSGID, KEYGEN
+			 , USER_ID, DEPT_NO, SEG_NO, SEND_TELNO, CAMPUS_NO, SEND_DATE
+			 , SMS_NAME, SMS_MESSAGE, STATUS, GUBUN, LEGAL_YN, LEGAL_CF
+			 , TASK_NM, SMS_STATUS, SEND_NM, SEND_TYP, TEMP_CD
+	</select>
+	
+	<update id="updateSmsStatus">
+		UPDATE NEO_SMS
+		   SET STATUS=#{status}
+		    <if test="sendStartDt != null and sendStartDt != ''">
+		   	 , SEND_START_DT=#{sendStartDt} 
+		   	</if>
+		 WHERE MSGID = #{msgid} AND KEYGEN=#{keygen}
+	</update>
+	
+	<select id="getSmsPhoneList" resultType="smsPhoneVO">
+		SELECT PHONE
+		  FROM NEO_SMS_PHONE
+		 WHERE MSGID  = #{msgid}
+		   AND KEYGEN = #{keygen}
+		 ORDER BY PHONE
+	</select>
+	
+	<insert id="insertSmsQueue" parameterType="smsQueueVO">
+		INSERT INTO BIZ_MSG
+		(
+			CMID
+		  , UMID
+		  , MSG_TYPE
+		  , STATUS
+		  , REQUEST_TIME
+		  , SEND_TIME
+		  , DEST_PHONE
+		  , SEND_PHONE
+		  , DEST_NAME
+		  , SEND_NAME
+		  , SUBJECT
+		  , MSG_BODY
+		  , NATION_CODE
+		  , SENDER_KEY
+		  , TEMPLATE_CODE
+		  , TIMEOUT
+		  , RE_TYPE
+		  , RE_BODY
+		  , RE_PART
+		  , AD_FLAG
+		  , ATTACHED_FILE
+		  , MSGID
+		  , KEYGEN
+		)
+		VALUES
+		<foreach collection="list" index="index" item="item" separator=",">
+		(
+			MD5(UUID())
+		  , #{item.umid}
+		  , #{item.msgType}
+		  , #{item.status}
+		  , NOW()
+		  , NOW()
+		  , #{item.destPhone}
+		  , #{item.sendPhone}
+		  , #{item.destName}
+		  , #{item.sendName}
+		  , #{item.subject}
+		  , #{item.msgBody}
+		  , #{item.nationCode}
+		  , #{item.senderKey}
+		  , #{item.templateCode}
+		  , #{item.timeout}
+		  , #{item.reType}
+		  , #{item.reBody}
+		  , #{item.rePart}
+		  , #{item.adFlag}
+		  , #{item.attachedFile}
+		  , #{item.msgid}
+		  , #{item.keygen}
+	    )
+	    </foreach>
+	</insert>
+	
+	<insert id="insertSmsLog" parameterType="smsSendLogVO">
+		INSERT INTO NEO_SMSLOG
+		(   MSGID
+		  , KEYGEN
+		  , PHONE
+		  , SEND_DT
+		  , RETRY_CNT
+		  , ID
+		  , NAME
+		  , EMAIL
+		  , ENCKEY
+		  , BIZKEY
+		  , USER_ID
+		  , DEPT_NO
+		  , SEND_TYP
+		  , MSG_TYP
+		  , REG_DT
+		  , CMID
+		  , UMID
+		  , SEND_TELNO
+		  , SEND_NM
+		  , PRT_DT
+		  , RSLT_CD
+		  , RCODE
+		  , RE_TYPE
+		  , RE_TYPE01
+		  , RE_TYPE02
+		  , RE_TYPE03
+		)
+		VALUES
+		(
+			#{msgid}
+		  , #{keygen}
+		  , #{phone}
+		  , #{sendDt}
+		  , #{retryCnt}
+		  , #{id}
+		  , #{name}
+		  , #{email}
+		  , #{enckey}
+		  , #{bizkey}
+		  , #{userId}
+		  , #{deptNo}
+		  , #{sendTyp}
+		  , #{msgTyp}
+		  , #{regDt}
+		  , #{cmid}
+		  , #{umid}
+		  , #{sendTelno}
+		  , #{sendNm}
+		  , #{prtDt}
+		  , #{rsltCd}
+		  , #{rcode}
+		  , #{reType}
+		  , #{reType01}
+		  , #{reType02}
+		  , #{reType03}
+		)
+	</insert> 
+	
+	<select id="getSegment" parameterType="_int" resultType="segmentVO">
+		SELECT SEG_NO 
+			 , DB_CONN_NO
+			 , SEG_NM
+			 , SEG_DESC
+			 , CREATE_TY
+			 , SELECT_	SELECT_SQL
+			 , FROM_ FROM_SQL
+			 , WHERE_ WHERE_SQL
+			 , ORDERBY_ ORDERBY_SQL
+			 , QUERY
+			 , MERGE_KEY
+			 , MERGE_COL
+			 , SEG_FL_PATH
+			 , SRC_WHERE
+		  FROM NEO_SEGMENT
+		 WHERE SEG_NO = #{segNo}
+	</select>
+	
+	<select id="getKakaoTemplateMergeList" parameterType="smsVO" resultType="smsVO">
+		SELECT Y.MERGY_ITEM
+			 , Z.KAKAO_COL 
+			 , Z.MERGE_COL AS KAKAO_MERGE_COL
+		  FROM NEO_SMS X
+		  	   INNER JOIN NEO_KAKAOTALK_TEMPLATE Y ON (X.TEMP_CD = Y.TEMP_CD)
+		  	   LEFT OUTER JOIN NEO_KAKAOTEMPLE_ITEM Z ON ( X.MSGID  = Z.MSGID AND X.KEYGEN  = Z.KEYGEN )
+		 WHERE X.MSGID  = #{msgid}
+		   AND X.KEYGEN = #{keygen}
+	</select>
+	
+	<select id="getSmsAttachList" parameterType="smsAttachVO" resultType="smsAttachVO">
+		SELECT ATT_NM
+			 , ATT_FL_PATH
+			 , MSGID
+			 , KEYGEN
+			 , ATT_FL_SIZE
+			 , ATT_FL_TY
+			 , ENCRYPT_YN
+			 , ENCRYPT_KEY
+			 , ENCRYPT_TY
+			 , ATT_PRIVIEW_PATH
+		  FROM NEO_ATTACH_SMS
+		 WHERE MSGID = #{msgid}
+		   AND KEYGEN = #{keygen}
+	</select>
+	
+	<select id="getDbConnInfo" parameterType="_int" resultType="dbConnVO">
+		SELECT DB_CONN_NO
+			 , DB_CONN_NM
+			 , DB_TY
+			 , DB_DRIVER
+			 , DB_URL
+			 , DB_CHAR_SET
+			 , LOGIN_ID
+			 , LOGIN_PWD
+		  FROM NEO_DBCONN 
+		 WHERE DB_CONN_NO = #{dbConnNo}
+	</select>
+</mapper>

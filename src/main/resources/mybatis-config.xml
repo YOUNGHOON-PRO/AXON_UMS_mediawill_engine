@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<settings>
+		<setting name="mapUnderscoreToCamelCase" value="true"/>
+		<setting name="callSettersOnNulls" value="false"/>
+		<setting name="jdbcTypeForNull" value="NULL"/>
+	</settings>
+	<!-- Alias 설정 -->
+	<typeAliases>
+		<typeAlias alias="smsVO" type="kr.co.enders.engine.vo.SmsVO" />
+		<typeAlias alias="smsAttachVO" type="kr.co.enders.engine.vo.SmsAttachVO" />
+		<typeAlias alias="smsPhoneVO" type="kr.co.enders.engine.vo.SmsPhoneVO" />
+		<typeAlias alias="kakaoTemplateVO" type="kr.co.enders.engine.vo.KakaoTemplateVO" />
+		<typeAlias alias="smsSendLogVO" type="kr.co.enders.engine.vo.SmsSendLogVO" />
+		<typeAlias alias="smsQueueVO" type="kr.co.enders.engine.vo.SmsQueueVO" />
+		<typeAlias alias="pushVO" type="kr.co.enders.engine.vo.PushVO" />
+		<typeAlias alias="pushSendLogVO" type="kr.co.enders.engine.vo.PushSendLogVO" />
+		<typeAlias alias="pushQueueVO" type="kr.co.enders.engine.vo.PushQueueVO" />
+		<typeAlias alias="segmentVO" type="kr.co.enders.engine.vo.SegmentVO" />
+		<typeAlias alias="segmentMemberVO" type="kr.co.enders.engine.vo.SegmentMemberVO" />
+		<typeAlias alias="dbConnVO" type="kr.co.enders.engine.vo.DbConnVO" />
+		<typeAlias alias="smsLogVO" type="kr.co.enders.engine.vo.SmsLogVO" />
+		<typeAlias alias="smsApiVO" type="kr.co.enders.engine.vo.SmsApiVO" />
+		<typeAlias alias="EmailApiVO" type="kr.co.enders.engine.vo.EmailApiVO" />
+		<typeAlias alias="PushApiVO" type="kr.co.enders.engine.vo.PushApiVO" />
+		
+		
+	</typeAliases>
+</configuration>
